@@ -15,16 +15,24 @@ API design
             - name of the component
             - if this name already exists, replace that compoenent with this component
                 - will be used to edit components
-        - set of tuples of type (string, string)
-            - first string is the JSON object
-            - second string is the type of object to be made
+        - dictionary of type (string, string)
+            - key is the JSON object
+            - value is the type of object to be made
                 - must equal "string", "bool", "array" etc. or any user made components that have already been made
     - example
         - name: "Address"
-        - values: {("street", "string"), ("areaCode", "int"), ("city", "string")}
+        - values: {
+                "street": "string",
+                "areaCode": "int",
+                "city": "string"
+            }
     - example 
         - name: "Employee"
-        - values: {("name", "string"), ("address", "Address"), ("cars", "array")}
+        - values: {
+                "name": "string",
+                "address": "Address", 
+                "cars": "array"
+            }
 
 
 - Create file
@@ -156,5 +164,35 @@ API design
                     "string"
                 ]
             }
-    
+
+- Get all file names
+    - GET
+    - /files
+    - returns: array of file names
+
+- Get file contents
+    - GET
+    - /file/{fileName}
+    - returns: (what was POSTed in "create file")
+        contents: raw json
+        structure: json structure
+
+- Get all components
+    - GET
+    - /components
+    - returns: dictionary of components
+        - key is component name
+        - value is the component type defined
+        - {
+            "Address": {
+                "street": "string",
+                "areaCode": "int",
+                "city": "string"
+            },
+            "Employee": {
+                "name": "string",
+                "address": "Address", 
+                "cars": "array"
+            }
+        }
     
