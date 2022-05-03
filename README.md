@@ -33,6 +33,9 @@ API design
                 "address": "Address", 
                 "cars": "array"
             }
+    - example curl post
+        - curl --data "name=address&value={\"zip\":\"INT\"}" http://127.0.0.1:5000/component 
+
 
 
 - Create file
