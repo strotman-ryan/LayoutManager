@@ -19,10 +19,7 @@ def component():
         value = request.form["value"]
         jsonValue = json.loads(value)
         for _, value in jsonValue.items():
-            print(value)
-            supportedValueTypes = supportedJsonPrimitives.union(components.keys())
-            if value not in supportedValueTypes:
+            if value not in supportedJsonPrimitives.union(components.keys()):
                 abort(404)
-        print(jsonValue)
         components[name] = jsonValue
     return components
