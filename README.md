@@ -16,7 +16,7 @@ API design
             - if this name already exists, replace that compoenent with this component
                 - will be used to edit components
         - dictionary of type (string, string)
-            - key is the JSON object
+            - key is the JSON parameter name
             - value is the type of object to be made
                 - must equal "string", "bool", "array" etc. or any user made components that have already been made
     - example
