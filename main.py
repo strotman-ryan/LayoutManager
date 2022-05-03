@@ -4,12 +4,9 @@ import json
 app = Flask(__name__)
 
 components = {}
-supportedJsonPrimitives = {"STRING", "INT", "BOOLEAN"}
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
-
+#TODO:  add support for Arrays
+supportedJsonPrimitives = {"STRING", "NUMBER", "BOOLEAN", "NULL"}
 
 
 @app.route("/component", methods=["POST"])
@@ -22,4 +19,4 @@ def component():
             if value not in supportedJsonPrimitives.union(components.keys()):
                 abort(404)
         components[name] = jsonValue
-    return components
+    return "It worked"
