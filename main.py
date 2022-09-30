@@ -14,8 +14,8 @@ def component(name):
     if request.method == "POST":
         value = request.form["value"]
         jsonValue = json.loads(value)
-        for _, value in jsonValue.items():
-            if value not in supportedJsonPrimitives.union(components.keys()):
+        for _, item in jsonValue.items():
+            if item not in supportedJsonPrimitives.union(components.keys()):
                 abort(404)
         components[name] = jsonValue
         return components
