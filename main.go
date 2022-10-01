@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +15,7 @@ func main() {
 	router.Run("localhost:8080")
 }
 
-// getAlbums responds with the list of all albums as JSON. prefix with gin
+// curl http://localhost:8080/component
 func getCustomComponentsGin(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, getCustomComponents())
 }
@@ -30,7 +29,11 @@ component = Serialized JSON
 	"key2": value
 }
 
+JSON good example
 curl -X POST http://localhost:8080/component -H 'Content-Type: application/json' -d '{"Person": { "name": "STRING",  "age": "INT"}}'
+
+JSON bad example
+curl -X POST http://localhost:8080/component -H 'Content-Type: application/json' -d '{"Person": { "name": "STRING", , "age": "INT"}}'
 */
 func addCustomComponentGin(c *gin.Context) {
 	var componentMap map[string]map[string]string
@@ -38,9 +41,22 @@ func addCustomComponentGin(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	fmt.Println(componentMap)
-	fmt.Println("hello")
+
+	//should only be one key, if there is more just return early
+	for name, properties := range componentMap {
+		if !addCustomComponent(name, properties) {
+			c.String(http.StatusNotAcceptable, "Improper component properties")
+			return
+		}
+		//only add the first one
+		c.String(http.StatusOK, "All Good")
+		return
+	}
+	c.String(http.StatusNotAcceptable, "Improper JSON format")
+	return
 }
+
+//---------------------NO GIN references below this line-------------------------
 
 // I want to keep logic seperate from Gin incase of we switch frameworks
 func getCustomComponents() map[string]map[string]string {
@@ -53,7 +69,8 @@ func addCustomComponent(name string, properties map[string]string) bool {
 	//check that all properties have existing types
 	componentNames := getComponentNames()
 	for _, value := range properties {
-		if !slices.Contains(componentNames, value) {
+		//Must be a componentName already registered and no recursion is allowed
+		if !slices.Contains(componentNames, value) || name == value {
 			return false
 		}
 	}
