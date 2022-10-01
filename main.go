@@ -22,11 +22,21 @@ func getCustomComponentsGin(c *gin.Context) {
 
 //expecting
 /*
-component = Serialized JSON
-"componenName": {
-	"parameter1name": "value1"
-	"key1": value
-	"key2": value
+{
+	"componenName": {
+		"key": "value1"
+		"key1": "value"
+		"key2": "value"
+	}
+}
+
+example
+{
+	"Person": {
+		"name": "STRING"
+		"age": "INT"
+		"male": "BOOL"
+	}
 }
 
 JSON good example
