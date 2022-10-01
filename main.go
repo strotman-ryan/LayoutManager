@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,7 @@ import (
 func main() {
 	router := gin.Default()
 	router.GET("/component", getCustomComponentsGin)
-	router.POST("/component")
+	router.POST("/component", addCustomComponentGin)
 
 	router.Run("localhost:8080")
 }
@@ -20,8 +21,25 @@ func getCustomComponentsGin(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, getCustomComponents())
 }
 
-func addCustomComponentGin(c *gin.Context) {
+//expecting
+/*
+component = Serialized JSON
+"componenName": {
+	"parameter1name": "value1"
+	"key1": value
+	"key2": value
+}
 
+curl -X POST http://localhost:8080/component -H 'Content-Type: application/json' -d '{"Person": { "name": "STRING",  "age": "INT"}}'
+*/
+func addCustomComponentGin(c *gin.Context) {
+	var componentMap map[string]map[string]string
+	if err := c.BindJSON(&componentMap); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	fmt.Println(componentMap)
+	fmt.Println("hello")
 }
 
 // I want to keep logic seperate from Gin incase of we switch frameworks
