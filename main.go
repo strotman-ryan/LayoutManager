@@ -97,17 +97,31 @@ func addFileGin(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	fmt.Println(componentMap.ComponentType)
-	fmt.Println(componentMap.Path)
-	fmt.Println(componentMap.Value)
+	if addFile(componentMap) {
+		c.String(http.StatusOK, "All Good")
+		return
+	}
+	c.String(http.StatusNotAcceptable, "Improper JSON format")
 }
 
 //---------------------NO GIN references below this line-------------------------
 
-type FileToJson struct {
-	Path          string      `json:"path"`
-	ComponentType string      `json:"type"`
-	Value         interface{} `json:"value"`
+// returns false if add fails
+func addFile(newJson FileToJson) bool {
+	//need all these properties
+	if newJson.Path == nil || newJson.ComponentType == nil || newJson.Value == nil {
+		fmt.Println("expected value not present")
+		return false
+	}
+
+	//check componetType is already registered
+	if !slices.Contains(getComponentNames(), *(newJson.ComponentType)) {
+		fmt.Println("componentType: not registered")
+		return false
+	}
+
+	//check the type matches the arbitrary data
+	return true
 }
 
 // I want to keep logic seperate from Gin incase of we switch frameworks
@@ -129,6 +143,15 @@ func addCustomComponent(name string, properties map[string]string) bool {
 
 	customComponents[name] = properties
 	return true
+}
+
+//---------------------------- helper functions ----------------------------------
+
+type FileToJson struct {
+	//all types are references so can check null to see if they exist
+	Path          *string      `json:"path"`
+	ComponentType *string      `json:"type"`
+	Value         *interface{} `json:"value"`
 }
 
 func getComponentNames() []string {
