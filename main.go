@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,7 @@ func main() {
 	router := gin.Default()
 	router.GET("/component", getCustomComponentsGin)
 	router.POST("/component", addCustomComponentGin)
+	router.POST("/file", addFileGin)
 
 	router.Run("localhost:8080")
 }
@@ -63,10 +65,50 @@ func addCustomComponentGin(c *gin.Context) {
 		return
 	}
 	c.String(http.StatusNotAcceptable, "Improper JSON format")
-	return
+}
+
+/*
+Registers a file to an endpoint
+expecting a JSON object
+example:
+
+	{
+		"path": "/homepage",
+		"type": "Person"
+		"value": {
+			"name": "Ryan",
+			"age": 24,
+			"male": true
+		}
+	}
+
+curl -X POST http://localhost:8080/file -H 'Content-Type: application/json' -d '{"path": "/homepage", "type": "Person", "value": {"name": "Ryan", "age": 24,"male": true}}'
+example:
+
+	{
+		"path": "/config",
+		"type": "INT"
+		"value": 56
+	}
+*/
+func addFileGin(c *gin.Context) {
+	var componentMap FileToJson
+	if err := c.BindJSON(&componentMap); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	fmt.Println(componentMap.ComponentType)
+	fmt.Println(componentMap.Path)
+	fmt.Println(componentMap.Value)
 }
 
 //---------------------NO GIN references below this line-------------------------
+
+type FileToJson struct {
+	Path          string      `json:"path"`
+	ComponentType string      `json:"type"`
+	Value         interface{} `json:"value"`
+}
 
 // I want to keep logic seperate from Gin incase of we switch frameworks
 func getCustomComponents() map[string]map[string]string {
@@ -96,7 +138,7 @@ func getComponentNames() []string {
 		names = append(names, name)
 	}
 
-	for name, _ := range customComponents {
+	for name := range customComponents {
 		names = append(names, name)
 	}
 
