@@ -124,6 +124,10 @@ func addFile(newJson FileToJson) bool {
 	return true
 }
 
+func jsonIsValid(componentType string, value interface{}) bool {
+	return false //TODO: Implement
+}
+
 // I want to keep logic seperate from Gin incase of we switch frameworks
 func getCustomComponents() map[string]map[string]string {
 	return customComponents
@@ -157,7 +161,7 @@ type FileToJson struct {
 func getComponentNames() []string {
 	//combine customComponents and builtInComponents names
 	names := []string{}
-	for _, name := range builtInComponents {
+	for _, name := range primitiveComponents {
 		names = append(names, name)
 	}
 
@@ -175,4 +179,4 @@ var customComponents = make(map[string]map[string]string)
 
 // like primitives
 // this would be constant if go language allowed it
-var builtInComponents = [3]string{"INT", "STRING", "BOOL"}
+var primitiveComponents = [3]string{"INT", "STRING", "BOOL"}
