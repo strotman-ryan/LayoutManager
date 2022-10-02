@@ -161,7 +161,7 @@ type FileToJson struct {
 func getComponentNames() []string {
 	//combine customComponents and builtInComponents names
 	names := []string{}
-	for _, name := range primitiveComponents {
+	for name := range primitiveComponents {
 		names = append(names, name)
 	}
 
@@ -179,4 +179,13 @@ var customComponents = make(map[string]map[string]string)
 
 // like primitives
 // this would be constant if go language allowed it
-var primitiveComponents = [3]string{"INT", "STRING", "BOOL"}
+var primitiveComponents = map[string]func(interface{}) bool{
+	"INT":    isType[int],
+	"STRING": isType[string],
+	"BOOL":   isType[bool],
+}
+
+func isType[T interface{}](value interface{}) bool {
+	_, ok := value.(T)
+	return ok
+}
