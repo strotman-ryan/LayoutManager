@@ -125,6 +125,12 @@ func addFile(newJson FileToJson) bool {
 }
 
 func jsonIsValid(componentType string, value interface{}) bool {
+	//check if it is a primitive component
+	if function, exist := primitiveComponents[componentType]; exist {
+		return function(value)
+	}
+
+	//check for customComponents
 	return false //TODO: Implement
 }
 
