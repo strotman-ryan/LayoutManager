@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -228,6 +229,15 @@ func isType[T interface{}](value interface{}) (bool, string) {
 	return ok, ""
 }
 
+func isInt(value interface{}) (bool, string) {
+	//cast to float64
+	if float, ok := value.(float64); ok && float == math.Trunc(float) {
+		return true, ""
+	}
+	return false, fmt.Sprintf("%v is of type %T; expecting type int", value, value)
+
+}
+
 // the key is the name of the component, value is a dictionary of its properties
 //
 //	the key is the name: the value is the type
@@ -237,6 +247,7 @@ var customComponents = make(map[string]map[string]string)
 // this would be constant if go language allowed it
 var primitiveComponents = map[string]func(interface{}) (bool, string){
 	"FLOAT":  isType[float64],
+	"INT":    isInt,
 	"STRING": isType[string],
 	"BOOL":   isType[bool],
 }
