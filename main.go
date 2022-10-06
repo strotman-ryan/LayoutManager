@@ -120,6 +120,13 @@ func addFile(newJson FileToJson) bool {
 	if !valid {
 		fmt.Println(errorString)
 	}
+
+	//store the JSON
+	if valid {
+		//Will overwrite previous data
+		endpoints[*newJson.Path] = *newJson.Value
+	}
+	fmt.Println(endpoints)
 	return valid
 }
 
@@ -196,6 +203,15 @@ func getComponentNames() []string {
 	return names
 }
 
+// returns error string if is not correct type
+func isType[T interface{}](value interface{}) (bool, string) {
+	_, ok := value.(T)
+	if !ok {
+		return ok, fmt.Sprintf("%v is of type %T; expecting type: %T", value, value, *new(T))
+	}
+	return ok, ""
+}
+
 // the key is the name of the component, value is a dictionary of its properties
 //
 //	the key is the name: the value is the type
@@ -209,11 +225,7 @@ var primitiveComponents = map[string]func(interface{}) (bool, string){
 	"BOOL":   isType[bool],
 }
 
-// returns error string if is not correct type
-func isType[T interface{}](value interface{}) (bool, string) {
-	_, ok := value.(T)
-	if !ok {
-		return ok, fmt.Sprintf("%v is of type %T; expecting type: %T", value, value, *new(T))
-	}
-	return ok, ""
-}
+// The user's JSON
+// key: the endpoint path like "/config" or "homepage/version3"
+// value: raw JSON
+var endpoints = map[string]interface{}{} //starts empty
