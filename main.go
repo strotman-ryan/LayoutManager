@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -115,10 +116,15 @@ func addFile(newJson FileToJson) bool {
 	}
 
 	//check the type matches the arbitrary data
-	return jsonIsValid(*newJson.ComponentType, *newJson.Value)
+	valid, errorString := jsonIsValid(*newJson.ComponentType, *newJson.Value)
+	if !valid {
+		fmt.Println(errorString)
+	}
+	return valid
 }
 
-func jsonIsValid(componentType string, value interface{}) bool {
+// returns error stirng if json is not valid
+func jsonIsValid(componentType string, value interface{}) (bool, string) {
 	//check if it is a primitive component
 	if function, exist := primitiveComponents[componentType]; exist {
 		return function(value)
@@ -133,17 +139,17 @@ func jsonIsValid(componentType string, value interface{}) bool {
 			if !exist {
 				//each property needs to be present
 				//TODO: add optional support
-				return false
+				return false, fmt.Sprintf("Property: %v does not exist", propertyName)
 			}
-			if !jsonIsValid(propertyType, value) {
+			if valid, error := jsonIsValid(propertyType, value); !valid {
 				//JSON was not valid for that property
-				return false
+				return valid, error
 			}
 		}
-		return true //All properties were found and were valid
+		return true, "" //All properties were found and were valid
 	}
 
-	return false //does not match any componet
+	return false, fmt.Sprintf("Component Type: %v does not exist", componentType)
 }
 
 // I want to keep logic seperate from Gin incase of we switch frameworks
@@ -197,13 +203,17 @@ var customComponents = make(map[string]map[string]string)
 
 // like primitives
 // this would be constant if go language allowed it
-var primitiveComponents = map[string]func(interface{}) bool{
+var primitiveComponents = map[string]func(interface{}) (bool, string){
 	"FLOAT":  isType[float64],
 	"STRING": isType[string],
 	"BOOL":   isType[bool],
 }
 
-func isType[T interface{}](value interface{}) bool {
+// returns error string if is not correct type
+func isType[T interface{}](value interface{}) (bool, string) {
 	_, ok := value.(T)
-	return ok
+	if !ok {
+		return ok, fmt.Sprintf("%v is of type %T; expecting type: %T", value, value, *new(T))
+	}
+	return ok, ""
 }
