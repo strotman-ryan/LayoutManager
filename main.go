@@ -13,6 +13,7 @@ func main() {
 	router.GET("/component", getCustomComponentsGin)
 	router.POST("/component", addCustomComponentGin)
 	router.POST("/file", addFileGin)
+	router.GET("/:urlLocation", getJSON)
 
 	router.Run("localhost:8080")
 }
@@ -57,23 +58,24 @@ func addCustomComponentGin(c *gin.Context) {
 	//should only be one key, if there is more just return early
 	for name, properties := range componentMap {
 		if !addCustomComponent(name, properties) {
-			c.String(http.StatusNotAcceptable, "Improper component properties")
+			c.String(http.StatusBadRequest, "Improper component properties")
 			return
 		}
 		//only add the first one
 		c.String(http.StatusOK, "All Good")
 		return
 	}
-	c.String(http.StatusNotAcceptable, "Improper JSON format")
+	c.String(http.StatusBadRequest, "Improper JSON format")
 }
 
 /*
 Registers a file to an endpoint
 expecting a JSON object
+path: should NOT start with a "/"
 example 1:
 
 	{
-		"path": "/homepage",
+		"path": "homepage",
 		"type": "Person"
 		"value": {
 			"name": "Ryan",
@@ -82,16 +84,16 @@ example 1:
 		}
 	}
 
-curl -X POST http://localhost:8080/file -H 'Content-Type: application/json' -d '{"path": "/homepage", "type": "Person", "value": {"name": "Ryan", "age": 24,"male": true}}'
+curl -X POST http://localhost:8080/file -H 'Content-Type: application/json' -d '{"path": "homepage", "type": "Person", "value": {"name": "Ryan", "age": 24,"male": true}}'
 example 2:
 
 	{
-		"path": "/config",
+		"path": "config",
 		"type": "FLOAT"
 		"value": 56
 	}
 
-curl -X POST http://localhost:8080/file -H 'Content-Type: application/json' -d '{"path": "/config", "type": "FLOAT", "value": 56}'
+curl -X POST http://localhost:8080/file -H 'Content-Type: application/json' -d '{"path": "config", "type": "FLOAT", "value": 56}'
 */
 func addFileGin(c *gin.Context) {
 	var componentMap FileToJson
@@ -103,7 +105,21 @@ func addFileGin(c *gin.Context) {
 		c.String(http.StatusOK, "All Good")
 		return
 	}
-	c.String(http.StatusNotAcceptable, "Improper JSON format")
+	c.String(http.StatusBadRequest, "Improper JSON format")
+}
+
+/* Get the raw JSON the user placed on the server
+curl http://localhost:8080/homepage
+curl http://localhost:8080/config
+*/
+
+func getJSON(c *gin.Context) {
+	urlPath := c.Param("urlLocation")
+	if json, exist := endpoints[urlPath]; exist {
+		c.JSON(http.StatusOK, json)
+	} else {
+		c.String(http.StatusBadRequest, "JSON does not exist")
+	}
 }
 
 //---------------------NO GIN references below this line-------------------------
