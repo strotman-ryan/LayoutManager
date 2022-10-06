@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -26,8 +25,8 @@ func getCustomComponentsGin(c *gin.Context) {
 /*
 {
 	"componenName": {
-		"key": "value1"
-		"key1": "value"
+		"key": "value1",
+		"key1": "value",
 		"key2": "value"
 	}
 }
@@ -35,17 +34,17 @@ func getCustomComponentsGin(c *gin.Context) {
 example
 {
 	"Person": {
-		"name": "STRING"
-		"age": "INT"
+		"name": "STRING",
+		"age": "FLOAT",
 		"male": "BOOL"
 	}
 }
 
 JSON good example
-curl -X POST http://localhost:8080/component -H 'Content-Type: application/json' -d '{"Person": { "name": "STRING",  "age": "INT"}}'
+curl -X POST http://localhost:8080/component -H 'Content-Type: application/json' -d '{"Person": { "name": "STRING",  "age": "FLOAT", "male": "BOOL"}}'
 
 JSON bad example
-curl -X POST http://localhost:8080/component -H 'Content-Type: application/json' -d '{"Person": { "name": "STRING", , "age": "INT"}}'
+curl -X POST http://localhost:8080/component -H 'Content-Type: application/json' -d '{"Person": { "name": "STRING", , "age": "FLOAT"}}'
 */
 func addCustomComponentGin(c *gin.Context) {
 	var componentMap map[string]map[string]string
@@ -70,7 +69,7 @@ func addCustomComponentGin(c *gin.Context) {
 /*
 Registers a file to an endpoint
 expecting a JSON object
-example:
+example 1:
 
 	{
 		"path": "/homepage",
@@ -83,13 +82,15 @@ example:
 	}
 
 curl -X POST http://localhost:8080/file -H 'Content-Type: application/json' -d '{"path": "/homepage", "type": "Person", "value": {"name": "Ryan", "age": 24,"male": true}}'
-example:
+example 2:
 
 	{
 		"path": "/config",
-		"type": "INT"
+		"type": "FLOAT"
 		"value": 56
 	}
+
+curl -X POST http://localhost:8080/file -H 'Content-Type: application/json' -d '{"path": "/config", "type": "FLOAT", "value": 56}'
 */
 func addFileGin(c *gin.Context) {
 	var componentMap FileToJson
@@ -110,18 +111,11 @@ func addFileGin(c *gin.Context) {
 func addFile(newJson FileToJson) bool {
 	//need all these properties
 	if newJson.Path == nil || newJson.ComponentType == nil || newJson.Value == nil {
-		fmt.Println("expected value not present")
-		return false
-	}
-
-	//check componetType is already registered
-	if !slices.Contains(getComponentNames(), *(newJson.ComponentType)) {
-		fmt.Println("componentType: not registered")
 		return false
 	}
 
 	//check the type matches the arbitrary data
-	return true
+	return jsonIsValid(*newJson.ComponentType, *newJson.Value)
 }
 
 func jsonIsValid(componentType string, value interface{}) bool {
@@ -131,7 +125,25 @@ func jsonIsValid(componentType string, value interface{}) bool {
 	}
 
 	//check for customComponents
-	return false //TODO: Implement
+	componentProperyDefinitions, componentExists := customComponents[componentType]
+	valueMap, valueExists := value.(map[string]interface{})
+	if componentExists && valueExists {
+		for propertyName, propertyType := range componentProperyDefinitions {
+			value, exist := valueMap[propertyName]
+			if !exist {
+				//each property needs to be present
+				//TODO: add optional support
+				return false
+			}
+			if !jsonIsValid(propertyType, value) {
+				//JSON was not valid for that property
+				return false
+			}
+		}
+		return true //All properties were found and were valid
+	}
+
+	return false //does not match any componet
 }
 
 // I want to keep logic seperate from Gin incase of we switch frameworks
@@ -186,7 +198,7 @@ var customComponents = make(map[string]map[string]string)
 // like primitives
 // this would be constant if go language allowed it
 var primitiveComponents = map[string]func(interface{}) bool{
-	"INT":    isType[int],
+	"FLOAT":  isType[float64],
 	"STRING": isType[string],
 	"BOOL":   isType[bool],
 }
