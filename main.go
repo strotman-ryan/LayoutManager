@@ -256,7 +256,7 @@ func isArray(value interface{}) (bool, string) {
 		for _, genericItem := range array {
 			item := *new(ArrayItem)
 			if error := mapstructure.Decode(genericItem, &item); error != nil {
-				return false, fmt.Sprint("%v", error)
+				return false, fmt.Sprintf("%v", error)
 			} else if item.ComponentType == nil || item.Value == nil {
 				return false, fmt.Sprintf("%v has a nil value", item)
 			} else {
