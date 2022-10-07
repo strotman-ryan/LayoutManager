@@ -125,8 +125,8 @@ curl http://localhost:8080/config
 
 func getJSON(c *gin.Context) {
 	urlPath := c.Param("urlLocation")
-	if json, exist := endpoints[urlPath]; exist {
-		c.JSON(http.StatusOK, json)
+	if file, exist := files[urlPath]; exist {
+		c.JSON(http.StatusOK, file.Value)
 	} else {
 		c.String(http.StatusBadRequest, "JSON does not exist")
 	}
@@ -150,7 +150,7 @@ func addFile(newJson FileToJson) bool {
 	//store the JSON
 	if valid {
 		//Will overwrite previous data
-		endpoints[*newJson.Path] = *newJson.Value
+		files[*newJson.Path] = newJson
 	}
 	return valid
 }
@@ -280,5 +280,6 @@ var primitiveComponents map[string]func(interface{}) (bool, string)
 
 // The user's JSON
 // key: the endpoint path like "/config" or "homepage/version3"
-// value: raw JSON
-var endpoints = map[string]interface{}{} //starts empty
+// value: File to JSOn struct
+// Future Improvements: the key is repeated in the FileToJson struct "path", make this a Set based on `Path` property uniquness
+var files = map[string]FileToJson{} //starts empty
