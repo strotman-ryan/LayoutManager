@@ -6,10 +6,19 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mitchellh/mapstructure"
 	"golang.org/x/exp/slices"
 )
 
 func main() {
+	//initlizing `primitiveComponents` here to break an initlization cycle
+	primitiveComponents = map[string]func(interface{}) (bool, string){
+		"FLOAT":  isType[float64],
+		"INT":    isInt,
+		"STRING": isType[string],
+		"BOOL":   isType[bool],
+		"ARRAY":  isArray,
+	}
 	router := gin.Default()
 	router.GET("/component", getCustomComponentsGin)
 	router.POST("/component", addCustomComponentGin)
@@ -143,7 +152,6 @@ func addFile(newJson FileToJson) bool {
 		//Will overwrite previous data
 		endpoints[*newJson.Path] = *newJson.Value
 	}
-	fmt.Println(endpoints)
 	return valid
 }
 
@@ -206,6 +214,11 @@ type FileToJson struct {
 	Value         *interface{} `json:"value"`
 }
 
+type ArrayItem struct {
+	ComponentType *string      `mapstructure:"type"`
+	Value         *interface{} `mapstructure:"value"`
+}
+
 func getComponentNames() []string {
 	//combine customComponents and builtInComponents names
 	names := []string{}
@@ -234,8 +247,28 @@ func isInt(value interface{}) (bool, string) {
 	if float, ok := value.(float64); ok && float == math.Trunc(float) {
 		return true, ""
 	}
-	return false, fmt.Sprintf("%v is of type %T; expecting type int", value, value)
+	return false, fmt.Sprintf("%v is of type %T; expecting type %T", value, value, *new(int))
+}
 
+func isArray(value interface{}) (bool, string) {
+	if array, ok := value.([]interface{}); ok {
+		//Have to convert each item one by one
+		for _, genericItem := range array {
+			item := *new(ArrayItem)
+			if error := mapstructure.Decode(genericItem, &item); error != nil {
+				return false, fmt.Sprint("%v", error)
+			} else if item.ComponentType == nil || item.Value == nil {
+				return false, fmt.Sprintf("%v has a nil value", item)
+			} else {
+				if valid, errorString := jsonIsValid(*item.ComponentType, *item.Value); !valid {
+					return valid, errorString
+				}
+			}
+		}
+		return true, ""
+	} else {
+		return false, fmt.Sprintf("%v is of type %T; expecting type %T", value, value, *new([]interface{}))
+	}
 }
 
 // the key is the name of the component, value is a dictionary of its properties
@@ -243,14 +276,7 @@ func isInt(value interface{}) (bool, string) {
 //	the key is the name: the value is the type
 var customComponents = make(map[string]map[string]string)
 
-// like primitives
-// this would be constant if go language allowed it
-var primitiveComponents = map[string]func(interface{}) (bool, string){
-	"FLOAT":  isType[float64],
-	"INT":    isInt,
-	"STRING": isType[string],
-	"BOOL":   isType[bool],
-}
+var primitiveComponents map[string]func(interface{}) (bool, string)
 
 // The user's JSON
 // key: the endpoint path like "/config" or "homepage/version3"
