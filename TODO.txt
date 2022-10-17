@@ -2,4 +2,3 @@ A list of TODOs:
 
 - Create the front end
     - Create the React + Type script project
-    
