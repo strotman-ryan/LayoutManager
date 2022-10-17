@@ -1,3 +1,5 @@
 A list of TODOs:
 
-- Get the raw JSON from the JSON all together
+- Create the front end
+    - Create the React + Type script project
+    
