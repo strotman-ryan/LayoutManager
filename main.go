@@ -10,14 +10,16 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+const arrayName = "ARRAY"
+
 func main() {
 	//initlizing `primitiveComponents` here to break an initlization cycle
-	primitiveComponents = map[string]func(interface{}) (bool, string){
-		"FLOAT":  isType[float64],
-		"INT":    isInt,
-		"STRING": isType[string],
-		"BOOL":   isType[bool],
-		"ARRAY":  isArray,
+	primitiveComponents = map[string]func(interface{}) (bool, interface{}){
+		"FLOAT":   isType[float64],
+		"INT":     isInt,
+		"STRING":  isType[string],
+		"BOOL":    isType[bool],
+		arrayName: isArray,
 	}
 	router := gin.Default()
 	router.GET("/component", getCustomComponentsGin)
@@ -126,10 +128,13 @@ curl http://localhost:8080/config
 func getJSON(c *gin.Context) {
 	urlPath := c.Param("urlLocation")
 	if file, exist := files[urlPath]; exist {
-		c.JSON(http.StatusOK, getRawJson(*file.ComponentType, file.Value))
-	} else {
-		c.String(http.StatusBadRequest, "JSON does not exist")
+		//get the raw value; The value should always be valid at this point
+		if valid, rawValue := jsonIsValid(*file.ComponentType, *file.Value); valid {
+			c.JSON(http.StatusOK, rawValue)
+			return
+		}
 	}
+	c.String(http.StatusBadRequest, "JSON does not exist")
 }
 
 //---------------------NO GIN references below this line-------------------------
@@ -190,21 +195,9 @@ type ArrayItem struct {
 	Value         *interface{} `mapstructure:"value"`
 }
 
-// Produces the JSON that will be used by the end users
-// Assumes the componentType and value are valid
-func getRawJson(componentType string, value interface{}) interface{} {
-	//currently only need to strip Arrays of extra metadata
-
-	//if it is a primitive component just return the value
-	if _, exist := primitiveComponents[componentType]; exist {
-		return value
-	}
-
-	return value
-}
-
 // returns error stirng if json is not valid
-func jsonIsValid(componentType string, value interface{}) (bool, string) {
+// if valid it returns the raw JSON form
+func jsonIsValid(componentType string, value interface{}) (bool, interface{}) {
 	//check if it is a primitive component
 	if function, exist := primitiveComponents[componentType]; exist {
 		return function(value)
@@ -214,6 +207,7 @@ func jsonIsValid(componentType string, value interface{}) (bool, string) {
 	componentProperyDefinitions, componentExists := customComponents[componentType]
 	valueMap, valueExists := value.(map[string]interface{})
 	if componentExists && valueExists {
+		var rawValues = make(map[string]interface{})
 		for propertyName, propertyType := range componentProperyDefinitions {
 			value, exist := valueMap[propertyName]
 			if !exist {
@@ -221,12 +215,15 @@ func jsonIsValid(componentType string, value interface{}) (bool, string) {
 				//TODO: add optional support
 				return false, fmt.Sprintf("Property: %v does not exist", propertyName)
 			}
-			if valid, error := jsonIsValid(propertyType, value); !valid {
+			valid, rawValue := jsonIsValid(propertyType, value)
+			if valid {
+				rawValues[propertyName] = rawValue
+			} else {
 				//JSON was not valid for that property
-				return valid, error
+				return valid, rawValue //rawValue is an error string here
 			}
 		}
-		return true, "" //All properties were found and were valid
+		return true, rawValues //All properties were found and were valid
 	}
 
 	return false, fmt.Sprintf("Component Type: %v does not exist", componentType)
@@ -247,24 +244,25 @@ func getComponentNames() []string {
 }
 
 // returns error string if is not correct type
-func isType[T interface{}](value interface{}) (bool, string) {
+func isType[T interface{}](value interface{}) (bool, interface{}) {
 	_, ok := value.(T)
 	if !ok {
 		return ok, fmt.Sprintf("%v is of type %T; expecting type: %T", value, value, *new(T))
 	}
-	return ok, ""
+	return ok, value
 }
 
-func isInt(value interface{}) (bool, string) {
+func isInt(value interface{}) (bool, interface{}) {
 	//cast to float64
 	if float, ok := value.(float64); ok && float == math.Trunc(float) {
-		return true, ""
+		return true, value
 	}
 	return false, fmt.Sprintf("%v is of type %T; expecting type %T", value, value, *new(int))
 }
 
-func isArray(value interface{}) (bool, string) {
+func isArray(value interface{}) (bool, interface{}) {
 	if array, ok := value.([]interface{}); ok {
+		var rawArray = make([]interface{}, 0) //initlizing like this so empty will marshall to `[]` not `nil`
 		//Have to convert each item one by one
 		for _, genericItem := range array {
 			item := *new(ArrayItem)
@@ -273,12 +271,15 @@ func isArray(value interface{}) (bool, string) {
 			} else if item.ComponentType == nil || item.Value == nil {
 				return false, fmt.Sprintf("%v has a nil value", item)
 			} else {
-				if valid, errorString := jsonIsValid(*item.ComponentType, *item.Value); !valid {
-					return valid, errorString
+				valid, result := jsonIsValid(*item.ComponentType, *item.Value)
+				if valid {
+					rawArray = append(rawArray, result)
+				} else {
+					return valid, result
 				}
 			}
 		}
-		return true, ""
+		return true, rawArray
 	} else {
 		return false, fmt.Sprintf("%v is of type %T; expecting type %T", value, value, *new([]interface{}))
 	}
@@ -289,7 +290,7 @@ func isArray(value interface{}) (bool, string) {
 //	the key is the name: the value is the type
 var customComponents = make(map[string]map[string]string)
 
-var primitiveComponents map[string]func(interface{}) (bool, string)
+var primitiveComponents map[string]func(interface{}) (bool, interface{})
 
 // The user's JSON
 // key: the endpoint path like "/config" or "homepage/version3"
