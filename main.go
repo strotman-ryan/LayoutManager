@@ -155,35 +155,6 @@ func addFile(newJson FileToJson) bool {
 	return valid
 }
 
-// returns error stirng if json is not valid
-func jsonIsValid(componentType string, value interface{}) (bool, string) {
-	//check if it is a primitive component
-	if function, exist := primitiveComponents[componentType]; exist {
-		return function(value)
-	}
-
-	//check for customComponents
-	componentProperyDefinitions, componentExists := customComponents[componentType]
-	valueMap, valueExists := value.(map[string]interface{})
-	if componentExists && valueExists {
-		for propertyName, propertyType := range componentProperyDefinitions {
-			value, exist := valueMap[propertyName]
-			if !exist {
-				//each property needs to be present
-				//TODO: add optional support
-				return false, fmt.Sprintf("Property: %v does not exist", propertyName)
-			}
-			if valid, error := jsonIsValid(propertyType, value); !valid {
-				//JSON was not valid for that property
-				return valid, error
-			}
-		}
-		return true, "" //All properties were found and were valid
-	}
-
-	return false, fmt.Sprintf("Component Type: %v does not exist", componentType)
-}
-
 // I want to keep logic seperate from Gin incase of we switch frameworks
 func getCustomComponents() map[string]map[string]string {
 	return customComponents
@@ -217,6 +188,35 @@ type FileToJson struct {
 type ArrayItem struct {
 	ComponentType *string      `mapstructure:"type"`
 	Value         *interface{} `mapstructure:"value"`
+}
+
+// returns error stirng if json is not valid
+func jsonIsValid(componentType string, value interface{}) (bool, string) {
+	//check if it is a primitive component
+	if function, exist := primitiveComponents[componentType]; exist {
+		return function(value)
+	}
+
+	//check for customComponents
+	componentProperyDefinitions, componentExists := customComponents[componentType]
+	valueMap, valueExists := value.(map[string]interface{})
+	if componentExists && valueExists {
+		for propertyName, propertyType := range componentProperyDefinitions {
+			value, exist := valueMap[propertyName]
+			if !exist {
+				//each property needs to be present
+				//TODO: add optional support
+				return false, fmt.Sprintf("Property: %v does not exist", propertyName)
+			}
+			if valid, error := jsonIsValid(propertyType, value); !valid {
+				//JSON was not valid for that property
+				return valid, error
+			}
+		}
+		return true, "" //All properties were found and were valid
+	}
+
+	return false, fmt.Sprintf("Component Type: %v does not exist", componentType)
 }
 
 func getComponentNames() []string {
