@@ -126,7 +126,7 @@ curl http://localhost:8080/config
 func getJSON(c *gin.Context) {
 	urlPath := c.Param("urlLocation")
 	if file, exist := files[urlPath]; exist {
-		c.JSON(http.StatusOK, file.Value)
+		c.JSON(http.StatusOK, getRawJson(*file.ComponentType, file.Value))
 	} else {
 		c.String(http.StatusBadRequest, "JSON does not exist")
 	}
@@ -188,6 +188,19 @@ type FileToJson struct {
 type ArrayItem struct {
 	ComponentType *string      `mapstructure:"type"`
 	Value         *interface{} `mapstructure:"value"`
+}
+
+// Produces the JSON that will be used by the end users
+// Assumes the componentType and value are valid
+func getRawJson(componentType string, value interface{}) interface{} {
+	//currently only need to strip Arrays of extra metadata
+
+	//if it is a primitive component just return the value
+	if _, exist := primitiveComponents[componentType]; exist {
+		return value
+	}
+
+	return value
 }
 
 // returns error stirng if json is not valid
