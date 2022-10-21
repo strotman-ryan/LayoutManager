@@ -33,8 +33,6 @@ export class DropDown extends React.Component {
     render() {
         return (
         <form onSubmit={this.handleSubmit}>
-            <label>
-            Pick your favorite flavor:
             <PropertyDefinition 
                 type = {this.state.type}
                 types = {this.types}
@@ -42,7 +40,6 @@ export class DropDown extends React.Component {
                 onTypeChange = {this.handleTypeChange} 
                 onNameChange = {this.handleNameChange}
                  />
-            </label>
             <input type="submit" value="Submit" />
         </form>
         );
