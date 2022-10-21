@@ -1,4 +1,5 @@
 import React from "react";
+import { PropertyDefinition } from "./PropertyDefinition";
 
 export class DropDown extends React.Component {
     constructor(props) {
@@ -48,17 +49,3 @@ export class DropDown extends React.Component {
     }
 }
 
-function PropertyDefinition(props) {
-    return (
-        <div>
-            <input type="text" value={props.textValue} onChange={props.onNameChange}/>
-            <select value={props.type} onChange={props.onTypeChange}>
-            {
-                props.types.map (type => 
-                    <option value={type}> {type} </option>
-                )
-            }
-            </select>
-        </div>
-    );
-}
