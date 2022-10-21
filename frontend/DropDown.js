@@ -25,16 +25,28 @@ export class DropDown extends React.Component {
         <form onSubmit={this.handleSubmit}>
             <label>
             Pick your favorite flavor:
-            <select value={this.state.value} onChange={this.handleChange}>
-                {
-                    this.options.map (option => 
-                        <option value={option}> {option} </option>
-                        )
-                }
-            </select>
+            <PropertyDefinition 
+                defaultValue = {this.state.value}
+                options = {this.options}
+                handleChange = {this.handleChange}  />
             </label>
             <input type="submit" value="Submit" />
         </form>
         );
     }
+}
+
+function PropertyDefinition(props) {
+    return (
+        <div>
+            <select value={props.defaultValue} onChange={props.handleChange}>
+            {
+                props.options.map (option => 
+                    <option value={option}> {option} </option>
+                )
+            }
+            </select>
+            <input type="text" value="Some text..."/>
+        </div>
+    );
 }
