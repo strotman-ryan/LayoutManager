@@ -3,11 +3,13 @@ import React from "react";
 export class DropDown extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {value: 'coconut'};
+        this.state = {value: this.options[0]};
 
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
+
+    options = ["INT", "STRING", "BOOL", "FLOAT"]
 
     handleChange(event) {
         this.setState({value: event.target.value});
@@ -24,10 +26,11 @@ export class DropDown extends React.Component {
             <label>
             Pick your favorite flavor:
             <select value={this.state.value} onChange={this.handleChange}>
-                <option value="grapefruit">Grapefruit</option>
-                <option value="lime">Lime</option>
-                <option value="coconut">Coconut</option>
-                <option value="mango">Mango</option>
+                {
+                    this.options.map (option => 
+                        <option value={option}> {option} </option>
+                        )
+                }
             </select>
             </label>
             <input type="submit" value="Submit" />
