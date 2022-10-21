@@ -3,20 +3,29 @@ import React from "react";
 export class DropDown extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {value: this.options[0]};
+        this.state = {
+            propertyName: "property name",
+            type: this.types[0],
+        };
 
-        this.handleChange = this.handleChange.bind(this);
+        this.handleTypeChange = this.handleTypeChange.bind(this);
+        this.handleNameChange = this.handleNameChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
-    options = ["INT", "STRING", "BOOL", "FLOAT"]
+    types = ["INT", "STRING", "BOOL", "FLOAT"]
 
-    handleChange(event) {
-        this.setState({value: event.target.value});
+
+    handleNameChange(event) {
+        this.setState({propertyName: event.target.value})
+    }
+
+    handleTypeChange(event) {
+        this.setState({type: event.target.value});
     }
 
     handleSubmit(event) {
-        alert('Your favorite flavor is: ' + this.state.value);
+        alert("Want a property of type " + this.state.type + " called " + this.state.propertyName);
         event.preventDefault();
     }
 
@@ -26,9 +35,12 @@ export class DropDown extends React.Component {
             <label>
             Pick your favorite flavor:
             <PropertyDefinition 
-                defaultValue = {this.state.value}
-                options = {this.options}
-                handleChange = {this.handleChange}  />
+                type = {this.state.type}
+                types = {this.types}
+                textValue = {this.state.propertyName}
+                onTypeChange = {this.handleTypeChange} 
+                onNameChange = {this.handleNameChange}
+                 />
             </label>
             <input type="submit" value="Submit" />
         </form>
@@ -39,14 +51,14 @@ export class DropDown extends React.Component {
 function PropertyDefinition(props) {
     return (
         <div>
-            <select value={props.defaultValue} onChange={props.handleChange}>
+            <input type="text" value={props.textValue} onChange={props.onNameChange}/>
+            <select value={props.type} onChange={props.onTypeChange}>
             {
-                props.options.map (option => 
-                    <option value={option}> {option} </option>
+                props.types.map (type => 
+                    <option value={type}> {type} </option>
                 )
             }
             </select>
-            <input type="text" value="Some text..."/>
         </div>
     );
 }
