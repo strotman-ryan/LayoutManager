@@ -7,11 +7,11 @@ export class DropDown extends React.Component {
         this.state = {
             properties: [
                 {
-                    propertyName: "property name",
+                    name: "property name",
                     type: this.types[0],
                 },
                 {
-                    propertyName: "property name",
+                    name: "property name",
                     type: this.types[0],
                 }
             ]        
@@ -26,7 +26,7 @@ export class DropDown extends React.Component {
 
 
     handleNameChange(index, event) {
-        this.state.properties[index].propertyName = event.target.value
+        this.state.properties[index].name = event.target.value
 
         this.setState(this.state)
     }
@@ -38,7 +38,7 @@ export class DropDown extends React.Component {
 
     handleSubmit(event) {
         const message = "Want a component with" + this.state.properties.map ( property =>
-            "\n a property of type " + property.type + " called " + property.propertyName + ";"
+            "\n a property of type " + property.type + " called " + property.name + ";"
         ).join()
 
         alert(message);
@@ -53,7 +53,7 @@ export class DropDown extends React.Component {
                 <PropertyDefinition 
                     type = {property.type}
                     types = {this.types}
-                    textValue = {property.propertyName}
+                    textValue = {property.name}
                     onTypeChange = {(e) => this.handleTypeChange(index, e)} 
                     onNameChange = {(e) => this.handleNameChange(index, e)}
                 />
