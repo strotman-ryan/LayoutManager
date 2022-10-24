@@ -20,6 +20,7 @@ export class DropDown extends React.Component {
         this.handleTypeChange = this.handleTypeChange.bind(this);
         this.handleNameChange = this.handleNameChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.onAddComponent = this.onAddComponent.bind(this);
     }
 
     types = ["INT", "STRING", "BOOL", "FLOAT"]
@@ -45,9 +46,19 @@ export class DropDown extends React.Component {
         event.preventDefault();
     }
 
+    onAddComponent(event) {
+        this.state.properties.push (
+            {
+                name: "property name",
+                type: this.types[0],
+            }
+        )
+        this.setState(this.state)
+    }
+
     render() {
         return (
-        <form onSubmit={this.handleSubmit}>
+        <div>
             {
                 this.state.properties.map ( (property, index) =>
                 <PropertyDefinition 
@@ -59,9 +70,10 @@ export class DropDown extends React.Component {
                 />
                 )
             }
-            
-            <input type="submit" value="Submit" />
-        </form>
+            <button onClick={this.onAddComponent}> Add Property </button>
+            <button onClick={this.handleSubmit}> Submit </button>
+        </div>
+
         );
     }
 }
