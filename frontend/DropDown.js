@@ -5,8 +5,16 @@ export class DropDown extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            propertyName: "property name",
-            type: this.types[0],
+            properties: [
+                {
+                    propertyName: "property name",
+                    type: this.types[0],
+                },
+                {
+                    propertyName: "property name",
+                    type: this.types[0],
+                }
+            ]        
         };
 
         this.handleTypeChange = this.handleTypeChange.bind(this);
@@ -17,29 +25,41 @@ export class DropDown extends React.Component {
     types = ["INT", "STRING", "BOOL", "FLOAT"]
 
 
-    handleNameChange(event) {
-        this.setState({propertyName: event.target.value})
+    handleNameChange(index, event) {
+        this.state.properties[index].propertyName = event.target.value
+
+        this.setState(this.state)
     }
 
-    handleTypeChange(event) {
-        this.setState({type: event.target.value});
+    handleTypeChange(index, event) {
+        this.state.properties[index].type = event.target.value
+        this.setState(this.state);
     }
 
     handleSubmit(event) {
-        alert("Want a property of type " + this.state.type + " called " + this.state.propertyName);
+        const message = "Want a component with" + this.state.properties.map ( property =>
+            "\n a property of type " + property.type + " called " + property.propertyName + ";"
+        ).join()
+
+        alert(message);
         event.preventDefault();
     }
 
     render() {
         return (
         <form onSubmit={this.handleSubmit}>
-            <PropertyDefinition 
-                type = {this.state.type}
-                types = {this.types}
-                textValue = {this.state.propertyName}
-                onTypeChange = {this.handleTypeChange} 
-                onNameChange = {this.handleNameChange}
-                 />
+            {
+                this.state.properties.map ( (property, index) =>
+                <PropertyDefinition 
+                    type = {property.type}
+                    types = {this.types}
+                    textValue = {property.propertyName}
+                    onTypeChange = {(e) => this.handleTypeChange(index, e)} 
+                    onNameChange = {(e) => this.handleNameChange(index, e)}
+                />
+                )
+            }
+            
             <input type="submit" value="Submit" />
         </form>
         );
