@@ -11,6 +11,7 @@ export function PropertyDefinition(props) {
                 )
             }
             </select>
+            <button onClick={props.onDelete}> Delete </button> 
         </div>
     );
 }

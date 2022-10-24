@@ -21,6 +21,7 @@ export class DropDown extends React.Component {
         this.handleNameChange = this.handleNameChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.onAddComponent = this.onAddComponent.bind(this);
+        this.onDeleteComponent = this.onDeleteComponent.bind(this);
     }
 
     types = ["INT", "STRING", "BOOL", "FLOAT"]
@@ -56,6 +57,11 @@ export class DropDown extends React.Component {
         this.setState(this.state)
     }
 
+    onDeleteComponent(index, event) {
+        this.state.properties.splice(index, 1)
+        this.setState(this.state)
+    }
+
     render() {
         return (
         <div>
@@ -65,6 +71,7 @@ export class DropDown extends React.Component {
                     type = {property.type}
                     types = {this.types}
                     textValue = {property.name}
+                    onDelete = {(e) => this.onDeleteComponent(index, e)}
                     onTypeChange = {(e) => this.handleTypeChange(index, e)} 
                     onNameChange = {(e) => this.handleNameChange(index, e)}
                 />
