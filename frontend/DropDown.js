@@ -5,11 +5,8 @@ export class DropDown extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            title: "Component Name...",
             properties: [
-                {
-                    name: "property name",
-                    type: this.types[0],
-                },
                 {
                     name: "property name",
                     type: this.types[0],
@@ -22,6 +19,7 @@ export class DropDown extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.onAddComponent = this.onAddComponent.bind(this);
         this.onDeleteComponent = this.onDeleteComponent.bind(this);
+        this.onTitleChange = this.onTitleChange.bind(this);
     }
 
     types = ["INT", "STRING", "BOOL", "FLOAT"]
@@ -39,12 +37,30 @@ export class DropDown extends React.Component {
     }
 
     handleSubmit(event) {
-        const message = "Want a component with" + this.state.properties.map ( property =>
-            "\n a property of type " + property.type + " called " + property.name + ";"
-        ).join()
+        //creating these pass through variables b/c compiler yells at me 
+        const title = this.state.title
+        var properties = {}
+        for (let property in this.state.properties) {
+            properties[property.name] = property.type
+        }
 
-        alert(message);
-        event.preventDefault();
+        var jsonObj = {}
+        jsonObj[title] = properties
+
+        fetch(
+            "http://localhost:8080/component",
+            {
+                method: "POST",
+                mode: "no-cors", //needed or it is sent as an OPTION method
+                headers: {
+                    "Content-Type": "application/json" //TODO: I do not think this is being set properly
+                },
+                body: JSON.stringify(jsonObj)
+            }
+        ).then((res) => res.text()) 
+        .then((text) => {
+            alert(text); //TODO: text is empty becuase of the "no-cors" header above
+        })
     }
 
     onAddComponent(event) {
@@ -62,9 +78,16 @@ export class DropDown extends React.Component {
         this.setState(this.state)
     }
 
+    onTitleChange(event) {
+        this.setState({
+            "title": event.target.value
+        })
+    }
+
     render() {
         return (
         <div>
+            <input type="text" value={this.state.title} onChange={this.onTitleChange}/>
             {
                 this.state.properties.map ( (property, index) =>
                 <PropertyDefinition 
