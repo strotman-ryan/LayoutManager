@@ -4,12 +4,23 @@ import { ComponentForm } from "./ComponentForm";
 export class ComponentFormLoad extends React.Component {
     constructor(props) {
         super(props);
-        // this.state = {      };
+        this.state = {  
+            state: "completed", //"loading", "completed", "error"
+            components: [], //when state is "completed" this will be set with values
+        };
     }
             
 
     render() {
-        return <ComponentForm />
+        if (this.state.state == "loading") {
+            return <p>loading...</p>
+        } 
+        if (this.state.state == "completed") {
+            return <ComponentForm />
+        }
+        //some error occured
+        return <p>ERROR</p>
+        
     }
 }
 
