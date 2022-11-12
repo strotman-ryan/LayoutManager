@@ -1,5 +1,5 @@
-import { ComponentForm } from "./ComponentForm";
+import { ComponentFormLoad } from "./ComponetFormLoad";
 
 export function App() {
-  return <ComponentForm />
+  return <ComponentFormLoad />
 }
