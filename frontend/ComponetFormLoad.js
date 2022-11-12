@@ -6,7 +6,7 @@ export class ComponentFormLoad extends React.Component {
         super(props);
         this.state = {  
             state: "completed", //"loading", "completed", "error"
-            components: [], //when state is "completed" this will be set with values
+            components: ["INT", "STRING", "BOOL", "FLOAT"], //when state is "completed" this will be set with values
         };
     }
             
@@ -16,7 +16,7 @@ export class ComponentFormLoad extends React.Component {
             return <p>loading...</p>
         } 
         if (this.state.state == "completed") {
-            return <ComponentForm />
+            return <ComponentForm components={this.state.components}/>
         }
         //some error occured
         return <p>ERROR</p>

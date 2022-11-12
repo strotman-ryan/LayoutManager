@@ -4,6 +4,7 @@ import { PropertyDefinition } from "./PropertyDefinition";
 export class ComponentForm extends React.Component {
     constructor(props) {
         super(props);
+        this.types = props.components
         this.state = {
             title: "Component Name...",
             properties: [
@@ -21,8 +22,6 @@ export class ComponentForm extends React.Component {
         this.onDeleteComponent = this.onDeleteComponent.bind(this);
         this.onTitleChange = this.onTitleChange.bind(this);
     }
-
-    types = ["INT", "STRING", "BOOL", "FLOAT"]
 
 
     handleNameChange(index, event) {
