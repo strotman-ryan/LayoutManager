@@ -40,7 +40,7 @@ func main() {
 
 // curl http://localhost:8080/component
 func getCustomComponentsGin(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, getCustomComponents())
+	c.IndentedJSON(http.StatusOK, getAllComponents())
 }
 
 //expecting
@@ -169,8 +169,8 @@ func addFile(newJson FileToJson) bool {
 }
 
 // I want to keep logic seperate from Gin incase of we switch frameworks
-func getCustomComponents() map[string]map[string]string {
-	return customComponents
+func getAllComponents() []string {
+	return getComponentNames()
 }
 
 // Will overwrite the component if one with that name already existed
