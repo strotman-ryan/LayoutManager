@@ -50,15 +50,14 @@ export class ComponentForm extends React.Component {
             "http://localhost:8080/component",
             {
                 method: "POST",
-                mode: "cors", //needed or it is sent as an OPTION method
                 headers: {
-                    "Content-Type": "application/json" //TODO: I do not think this is being set properly
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify(jsonObj)
             }
         ).then((res) => res.text()) 
         .then((text) => {
-            alert(text); //TODO: text is empty becuase of the "no-cors" header above
+            alert(text);
         })
     }
 
