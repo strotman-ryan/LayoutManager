@@ -2,8 +2,13 @@ import React from "react";
 import { ComponentForm } from "./ComponentForm";
 import { backendBaseUrl } from "./App";
 
-export class ComponentFormLoad extends React.Component {
-    constructor(props) {
+interface ComponentFormLoadState {
+    state: string;
+    components: string[];
+}
+
+export class ComponentFormLoad extends React.Component<{}, ComponentFormLoadState> {
+    constructor(props: {}) {
         super(props);
         this.state = {  
             state: "loading", //"loading", "completed", "error"
@@ -17,9 +22,12 @@ export class ComponentFormLoad extends React.Component {
         .then((res) => res.json()) 
         .then((components) => {
             //components is [string]
-            this.state.state = "completed"
-            this.state.components = components
-            this.setState(this.state)
+            this.setState(
+                {
+                    state: "completed",
+                    components: components
+                }
+            )
         })
     }
             
