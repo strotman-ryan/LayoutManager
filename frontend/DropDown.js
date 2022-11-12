@@ -51,7 +51,7 @@ export class DropDown extends React.Component {
             "http://localhost:8080/component",
             {
                 method: "POST",
-                mode: "no-cors", //needed or it is sent as an OPTION method
+                mode: "cors", //needed or it is sent as an OPTION method
                 headers: {
                     "Content-Type": "application/json" //TODO: I do not think this is being set properly
                 },

@@ -5,6 +5,7 @@ import (
 	"math"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/exp/slices"
@@ -22,6 +23,12 @@ func main() {
 		arrayName: isArray,
 	}
 	router := gin.Default()
+
+	//Set up Cors
+	//TODO SECURITY RISK: make this more granular
+	//This allows all orgins
+	router.Use(cors.Default())
+
 	router.GET("/component", getCustomComponentsGin)
 	router.POST("/component", addCustomComponentGin)
 	router.POST("/file", addFileGin)
