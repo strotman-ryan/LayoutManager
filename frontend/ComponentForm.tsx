@@ -2,7 +2,24 @@ import React from "react";
 import { PropertyDefinition } from "./PropertyDefinition";
 import { backendBaseUrl } from "./App";
 
-export class ComponentForm extends React.Component {
+interface ComponentFormState {
+    title: string;
+    properties: Property[];
+}
+
+interface Property {
+    name: string;
+    type: string;
+}
+
+interface ComponentFormProps {
+    components: string[]
+}
+
+export class ComponentForm extends React.Component<ComponentFormProps, ComponentFormState> {
+
+    types: string[];
+
     constructor(props) {
         super(props);
         this.types = props.components
@@ -37,15 +54,13 @@ export class ComponentForm extends React.Component {
     }
 
     handleSubmit(event) {
-        //creating these pass through variables b/c compiler yells at me 
-        const title = this.state.title
-        var properties = {}
-        for (let property in this.state.properties) {
+        var properties: {[key: string]:string} = {}
+        for (var property of this.state.properties) {
             properties[property.name] = property.type
         }
 
-        var jsonObj = {}
-        jsonObj[title] = properties
+        var jsonObj: {[key: string]: any} = {}
+        jsonObj[this.state.title] = properties
 
         fetch(
             backendBaseUrl + "component",
