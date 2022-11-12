@@ -1,3 +1,4 @@
+import React from "react";
 import { ComponentFormLoad } from "./ComponetFormLoad";
 
 export function App() {
@@ -5,4 +6,4 @@ export function App() {
 }
 
 //constants
-export let backendBaseUrl = "http://localhost:8080/"
+export let backendBaseUrl: String = "http://localhost:8080/"
