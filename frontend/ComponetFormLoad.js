@@ -1,5 +1,6 @@
 import React from "react";
 import { ComponentForm } from "./ComponentForm";
+import { backendBaseUrl } from "./App";
 
 export class ComponentFormLoad extends React.Component {
     constructor(props) {
@@ -12,7 +13,7 @@ export class ComponentFormLoad extends React.Component {
 
     componentDidMount() {
         //get all available components
-        fetch("http://localhost:8080/component")
+        fetch( backendBaseUrl + "component")
         .then((res) => res.json()) 
         .then((components) => {
             //components is [string]

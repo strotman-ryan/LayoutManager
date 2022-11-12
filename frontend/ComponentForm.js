@@ -1,5 +1,6 @@
 import React from "react";
 import { PropertyDefinition } from "./PropertyDefinition";
+import { backendBaseUrl } from "./App";
 
 export class ComponentForm extends React.Component {
     constructor(props) {
@@ -47,7 +48,7 @@ export class ComponentForm extends React.Component {
         jsonObj[title] = properties
 
         fetch(
-            "http://localhost:8080/component",
+            backendBaseUrl + "component",
             {
                 method: "POST",
                 headers: {
