@@ -1,7 +1,7 @@
 import React from "react";
 import { PropertyDefinition } from "./PropertyDefinition";
 
-export class DropDown extends React.Component {
+export class ComponentForm extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
