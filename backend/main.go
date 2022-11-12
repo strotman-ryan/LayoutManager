@@ -25,9 +25,10 @@ func main() {
 	router := gin.Default()
 
 	//Set up Cors
-	//TODO SECURITY RISK: make this more granular
-	//This allows all orgins
-	router.Use(cors.Default())
+	config := cors.DefaultConfig()
+	//Allow only the front end code to make requests
+	config.AllowOrigins = []string{"http://localhost:1234"}
+	router.Use(cors.New(config))
 
 	router.GET("/component", getCustomComponentsGin)
 	router.POST("/component", addCustomComponentGin)
